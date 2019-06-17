@@ -1,0 +1,3 @@
+C:\ClassroomHelper\ClassHelper\obj\Debug\ClassHelper.njsprojAssemblyReference.cache
+C:\ClassroomHelper\ClassHelper\obj\Debug\ClassHelper.njsproj.CoreCompileInputs.cache
+C:\ClassroomHelper\ClassHelper\bin\Microsoft.NodejsTools.WebRole.dll

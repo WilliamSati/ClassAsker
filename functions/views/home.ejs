@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
+  <head>
+    <meta name="keywords" content="Learning, App, Learning app"  />
+    <meta name="description" content="A learning tool to help students rank class questions" />
+    <title>Classroom Helper</title>
+    <link rel="stylesheet" type="text/css" href="assets/main.css"/>
+    
+    <!--Import Google Icon Font-->
+      <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+     
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+      <!-- Compiled and minified JavaScript -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+	  <!-- jQuery -->
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+
+    </head>
+    
+<body class="blue">
+ <% include navigation.ejs %>
+
+ <div class="row"></div>
+   <div class="row"></div>
+
+<div class="row">
+  <div class="col s6">
+    <div class="card"> 
+       <div class="card-content">
+           <div class="card-title"> Students can post their questions anonymously during class</div>
+           <p>Students can show their support for a question 
+           by clicking on the 'upvote' button. The most upvoted questions go to the top.</p>  
+       </div>
+       <div class="card-action">
+         <a href="#popUpa" class="modal-trigger btn">Learn More</a>
+       </div>
+    </div>
+  </div>
+   <div class="col s6 white-text center-align">
+    <div>
+      <h3>
+        <strong>
+          A real-time feedback tool for classrooms.    
+        </strong>
+      </h3>
+    </div>
+    <div>
+       <a class="btn-large" href="https://classroom-helper-8cf0c.web.app/login">Login</a>
+      &nbsp &nbsp
+       <a class="btn-large" href="https://classroom-helper-8cf0c.web.app/signup">Signup</a> 
+    </div>
+  </div>
+</div>
+   
+<div class="row">
+  <div class="col s6">
+    <div class="card">
+        <div class="card-content">
+          <div class="card-title"> Professors see the questions students have during the lecture </div>
+          <p>Professors can check the top voted questions to see where students are getting stuck and address the top voted questions.
+          Professors can also create common questions themselves before class starts for students to vote on
+          to gauge where students are getting lost. 
+          </p>
+        </div>
+        <div class="card-action">
+          <a href="#popUpb" class="modal-trigger btn">Learn More</a>
+        </div>
+    </div>
+  </div>
+</div>
+
+   <div class="modal" id="popUpa">
+     <div class="modal-content">
+       <p>A big part of why students don't ask questions is because of social pressure. Questions like: "Everyone probably knows this already"
+       or, "I don't want to waste the professor's time" often prevent students from raising their hand 
+       and will sometimes result in the student disengaging from the lecture. ClassroomHelper solves this by eliminating the social pressure: the 
+       question is posted and voted on anonymously.</p>
+     </div>
+   </div>
+   
+   <div class="modal" id="popUpb">
+     <div class="modal-content">
+       <p>
+         A concern many professors have is that students will be distracted while they're entering in their question. To avoid this, professors can post
+         questions that are key to understanding the concepts that will be covered beforehand. This way, throughout an explenation, professors can look at the 
+         corresponding question for that topic and see how many people still have it up-voted. If enough people still have it upvoted, 
+         meaning they still don't understand the topic, the professor knows to explain that topic further.
+         
+       </p>
+     </div>
+   </div>
+
+
+
+
+<!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/6.0.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/6.0.2/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/6.0.2/firebase-firestore.js"></script>
+
+
+<script>
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyDAZbHYl2zGdEPq_ksRupnrU4q4TeS85EI",
+    authDomain: "classroom-helper-8cf0c.firebaseapp.com",
+    databaseURL: "https://classroom-helper-8cf0c.firebaseio.com",
+    projectId: "classroom-helper-8cf0c",
+    storageBucket: "classroom-helper-8cf0c.appspot.com",
+    messagingSenderId: "276874347051",
+    appId: "1:276874347051:web:28c5fcfc0fa7f240"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+</script>
+
+	<script src="/assets/functions.js"></script>
+    <script src="/assets/home.js"></script>
+	<script src="/assets/navigation.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
+  <head>
+    <meta name="keywords" content="Learning, App, Learning app"  />
+    <meta name="description" content="A learning tool to help students rank class questions" />
+    <title>Classroom Helper</title>
+    <link rel="stylesheet" type="text/css" href="assets/main.css"/>
+    
+    <!--Import Google Icon Font-->
+      <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+     
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+	 <!-- jQuery -->
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+      
+  </head>
+    
+
+<body class="blue">
+ <% include navigation.ejs %>
+ <div class="section"></div>
+
+ <div class="container">
+
+	 <div class="card"> <div class="card-title center">SignUp </div>
+
+		<div class="card-content">
+			<div class="row">
+				<div class="input-field col s12">
+					<input placeholder="Email" id="emailSignup" type="email" class="validate">
+				</div>
+			</div>
+			<div class="row">
+				<div class="input-field col s12">
+					<input placeholder="Password" id="passwordSignup" type="password" class="validate">
+				</div>
+			</div>
+		</div>
+
+		<div class="card-action">
+          <button id="btnSignup" class="btn-action btn">SignUp </button>
+        </div>
+		
+	 </div>
+
+	 <a href="https://classroom-helper-8cf0c.web.app/myClasses" class="loggedInTag btn" style="display:none;">Go to my classes</a>
+
+
+ </div>
+
+ <div class="modal" id="cannotCreateUser">
+	   <div class="modal-content">
+		 <div class="signupErrorMessage">
+		 </div>
+	   </div>
+ </div>
+
+ <div class="modal" id="createdUser">
+	   <div class="modal-content">
+		<p><h4> Succes! </h4></p>
+		<h5> To begin, head over to the MyClasses section. </h5>
+	   </div>
+	<div class="modal-footer">
+	<a class="btn" href="https://classroom-helper-8cf0c.web.app/myClasses">Go to MyClasses</a>
+	</div>
+
+</div>
+
+ 	<!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/6.0.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/6.0.2/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/6.0.2/firebase-firestore.js"></script>
+
+
+
+
+<script>
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyDAZbHYl2zGdEPq_ksRupnrU4q4TeS85EI",
+    authDomain: "classroom-helper-8cf0c.firebaseapp.com",
+    databaseURL: "https://classroom-helper-8cf0c.firebaseio.com",
+    projectId: "classroom-helper-8cf0c",
+    storageBucket: "classroom-helper-8cf0c.appspot.com",
+    messagingSenderId: "276874347051",
+    appId: "1:276874347051:web:28c5fcfc0fa7f240"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+
+</script>
+	  <script src="/assets/functions.js"></script>
+      <script src="/assets/signup.js"></script>
+	  <script src="/assets/navigation.js"></script>
+	
+
+</body>
+
+</html>

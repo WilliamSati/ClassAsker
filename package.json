@@ -1,0 +1,21 @@
+{
+  "name": "class-helper",
+  "version": "0.0.0",
+  "description": "ClassHelper",
+  "main": "index.js",
+  "author": "William Sati",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "no"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "ejs": "^2.6.1",
+    "express": "^4.16.4",
+    "jQuery": "^1.7.4",
+    "materialize-css": "^1.0.0-rc.2"
+  }
+}

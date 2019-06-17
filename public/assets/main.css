@@ -1,0 +1,26 @@
+.myLogo {
+    height: 50px;
+    width: 300px;
+    margin-bottom:auto;
+    margin-top: 7px;
+}
+.home{
+    
+    color: white;
+    padding-left: 50px;
+}
+.home h1{
+    font-size: 30px;
+}
+.home h2{
+    font-size: 20px;
+}
+.home h3{
+    font-size: 15px;
+}
+.signupForm{
+    color: white;
+}
+.loggedInTags{
+    display:none;
+}
