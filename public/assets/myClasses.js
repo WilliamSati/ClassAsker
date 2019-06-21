@@ -48,7 +48,9 @@ btnClassSubmit.addEventListener('click', e => {
 
         db.collection('classes').doc(classInputed).set({
             name: classInputed,
-            creator: auth.currentUser.uid
+            creator: auth.currentUser.uid,
+            members: 0,
+            following: 0
         }).then(() => {
             joinClass(classInputed, true);
         });
@@ -64,8 +66,7 @@ const joinClass = (classInputed, isOwner) => {
 
     db.collection('classes').get().then(snapshot => {
         var existingClasses = snapshot.docs;
-
-
+        //check if the class exists
         var classExists = false;
         for (var i = 0; i < existingClasses.length; i++) {
             var classData = existingClasses[i].data();
@@ -73,22 +74,48 @@ const joinClass = (classInputed, isOwner) => {
                 classExists = true;//continue to join the class
             }
         }
-
+        //if the class doesen't exist, return
         if (!classExists) {
             console.log('the class ', classInputed, ' does not exist');
             var instance = M.Modal.getInstance(documentDoesNotExist);
             instance.open();
             return;
         }
+        //now you can continue
 
+
+        //In the user's folder, add the class in the joined classes list.
         db.collection('users').doc(auth.currentUser.uid).collection('joinedClasses').doc(classInputed).set({
-            name: classInputed,
-            owner: isOwner
+            name: classInputed, //className
+            owner: isOwner,     //whether or not they created it
+            following: true     //whether they're following along or not
         }).then(() => {
-            manageClassesUI(1);//done adding the class to the user's list of joined classes.
+
+            //in the class folder, increment the number of members and the number of people following
+            db.collection('classes').doc(classInputed).get().then(theClass => {
+               var classData = theClass.data();
+
+                //get and increment the data only if the user is not the creator
+                if (!isOwner) {
+                    var numberOfMembers = classData.members;
+                    var numberFollowing = classData.following;
+                    numberOfMembers += 1;
+                    numberFollowing += 1; //when you join a class, you're following by default
+
+                    //update the data
+                    db.collection('classes').doc(classInputed).update({
+                        members: numberOfMembers,
+                        following: numberFollowing
+                    });
+                }
+
+                manageClassesUI(1);//done adding the class to the user's list of joined classes.
+            });
+
         }).catch(error => {
             console.log(error);
         });
+
     });
 }
 
@@ -204,11 +231,54 @@ const deleteClass = (docID) => {
         });
     });
 }
-const removeClass = (classID) => {
-    db.collection('users').doc(auth.currentUser.uid).collection('joinedClasses').doc(classID).delete().then(() => {
-        console.log('deleted user class', classID);//done
-        manageClassesUI(1);
+const removeClass = (classID) => { //the owner will never click this
+
+    //start by checking if the user was following the class and then delete the class from the user's list ofjoined classes
+    //then, update the class's number of members and number of people following to reflect the new value;
+
+    db.collection('users').doc(auth.currentUser.uid).collection('joinedClasses').doc(classID).get().then(joinedClass => {
+
+        var joinedClassData = joinedClass.data();
+        var following = true; // will be used to 'remember' whether or not he was following the class
+
+        //check if the user was following the class;
+        if (!joinedClassData.following) {
+            following = false;
+        }
+
+        //delete the class from the list of their joined classes
+        db.collection('users').doc(auth.currentUser.uid).collection('joinedClasses').doc(classID).delete().then(() => {
+            console.log('deleted user class', classID);//deleted the class from the user's list of joined classes
+
+            //then, update the class's member and follow numbers accordingly
+            db.collection('classes').doc(classID).get().then(theClass => {
+                classData = theClass.data();
+                var numberOfMembers = classData.members;
+                var numberFollowing = classData.following;
+                numberOfMembers -= 1;//the number of members decreases no matter what
+                //the number of people following along only decreases if the person was following
+                if (following) {
+                    numberFollowing -= 1;
+                } 
+
+                //update the data 
+                db.collection('classes').doc(classID).update({
+                    members: numberOfMembers,
+                    following: numberFollowing
+                }).then(() => {
+                    manageClassesUI(1);//done adding the class to the user's list of joined classes.
+                }).catch(error => {
+                    console.log('could not update data', error);
+                });
+
+            }).catch(error => {
+                console.log('could not get the class from the list of classes', error);
+            })
+        }).catch(error => {
+            console.log('could not delete the document from users joined classes list', error);
+        });
     }).catch(error => {
-        console.log('could not remove document from user list', error);
+        console.log('error getting the class from the users joined classes list', error);
     });
+
 }
