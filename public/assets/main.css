@@ -21,6 +21,20 @@
 .signupForm{
     color: white;
 }
-.loggedInTags{
+
+/*
+    necessary so that they are hidden in the transition stages
+*/
+
+.loggedInTag{
     display:none;
 }
+/*unique to creators*/
+.creatorTag{
+    display:none;
+}
+/*unique to members*/
+.memberTag{
+    display:none;
+}
+

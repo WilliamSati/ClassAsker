@@ -1,7 +1,8 @@
 const btnQuestionSubmit = document.getElementById('btnQuestionSubmit');
 const questionInput = document.getElementById('questionInput');
 var pageTitle = document.querySelector('.title');
-
+var btnGood = document.getElementById('btnGood');
+var btnLost = document.getElementById('btnLost');
 
 
 //get data
@@ -13,6 +14,7 @@ auth.onAuthStateChanged(firebaseUser => {
     }
     manageQuestionUI(firebaseUser);
     manageTags(firebaseUser);
+    manageCreatorMember();
 });
 
 //called when you click on a list item. The questionID is embeded in the html when the list item 
@@ -108,31 +110,63 @@ btnQuestionSubmit.addEventListener('click', e => {
 document.addEventListener('DOMContentLoaded', function () {
     var currentClass = sessionStorage.getItem("currentClass");
 
+    //initialize the modals and the tool tips
     var modals = document.querySelectorAll('.modal');
     M.Modal.init(modals);
-
     var elemsToolTips = document.querySelectorAll('.tooltipped');
     M.Tooltip.init(elemsToolTips);
 
-    var doc = db.collection('classes').doc(currentClass).collection('questions');
-
-    doc.onSnapshot(docSnapshot => {
+    //realtime listener, is called whenever any part of the questions collection has changed
+    var currentClassQuestions = db.collection('classes').doc(currentClass).collection('questions');
+    currentClassQuestions.onSnapshot(docSnapshot => {
         console.log(`Received doc snapshot: ${docSnapshot}`);
         manageQuestionUI(1);
     }, err => {
         console.log(`Encountered error: ${err}`);
-        });
+    });
 
+    //what happens if someone is on the questions page when the class is deleted?
+    //this realtime listener is called whenever the class document has been changed, so it will catch when it is deleted
     var classDoc = db.collection('classes').doc(currentClass);
     classDoc.onSnapshot(snapshot => {
         console.log('class has been changed');
         classDoc.get().then(theClass => {
-            if (!theClass.exists) {
+            if (!theClass.exists) { //if the class has been deleted, go back to the myClasses section
                 goToMyClasses();
             }
         });
     });
+
+//the state of the user was saved regarding whether he understood or didn't understand the class. 
+    //now let's update the buttons to reflect the user's saved state.
+    console.log('this is the currentUser', auth.currentUser);
+    manageCreatorMember(); //if a user is a member, show the member elements and hide the creator elements. inverse for creat
+    setGoodLostButtons();
+
 });
+
+const setGoodLostButtons = () => {
+    var currentClass = sessionStorage.getItem("currentClass");
+
+    if (auth.currentUser == null) {
+        //doNothing
+    } else {
+        db.collection('users').doc(auth.currentUser.uid).collection('joinedClasses').doc(currentClass).get().then(userCurrentClass => {
+
+            if (userCurrentClass.data().following) {
+                //update the button styles to reflect the fact that you're following along
+                btnGood.classList.remove('grey', 'z-depth-0'); //if they don't exist then the function WON'T throw an error
+                btnLost.classList.remove('red', 'darken-2')
+                btnLost.classList.add('grey', 'z-depth-0'); //will not add a class twice if it already exists
+            } else {
+                //update the button styles to reflect the fact that you're lost
+                btnGood.classList.add('grey', 'z-depth-0'); //will not add a class twice if it already exists
+                btnLost.classList.add('red', 'darken-2');
+                btnLost.classList.remove('grey', 'z-depth-0'); //if they don't exist then the function WON'T throw an error
+            }
+        });
+    }
+}
 
 const goToMyClasses = () => {
     alert("Sorry, the class Creator has just deleted the class");
@@ -225,5 +259,61 @@ const resolveQuestion = (questionID) => {
     });
 }
 
-//this is also a test
+//triggered if the user wants to indicate that they are following along. The user could already be following or not
+btnGood.addEventListener('click', function () {
+    var currentClass = sessionStorage.getItem("currentClass");
 
+    //update the user's following status to true;
+    db.collection('users').doc(auth.currentUser.uid).collection('joinedClasses').doc(currentClass).get().then(userCurrentClass => {
+        if (userCurrentClass.data().following) {
+            return;//there is nothing else to do if they are already following along
+        } else {
+            const increment = firebase.firestore.FieldValue.increment(1);
+
+            //update the user's following status
+            //update the user's following status
+            db.collection('users').doc(auth.currentUser.uid).collection('joinedClasses').doc(currentClass).update({
+                following: true
+            });
+
+            //update the total number of followers on the class document
+            db.collection('classes').doc(currentClass).update({
+                following: increment
+            });
+        }
+    });
+
+    //update the button styles
+    btnGood.classList.remove('grey', 'z-depth-0'); //if they don't exist then the function WON'T throw an error
+    btnLost.classList.remove('red', 'darken-2')
+    btnLost.classList.add('grey', 'z-depth-0'); //will not add a class twice if it already exists
+
+});
+
+btnLost.addEventListener('click', function () {
+    var currentClass = sessionStorage.getItem("currentClass");
+
+    //update the user's following status to true;
+    db.collection('users').doc(auth.currentUser.uid).collection('joinedClasses').doc(currentClass).get().then(userCurrentClass => {
+        if (!userCurrentClass.data().following) {
+            return;//there is nothing else to do if they are already not following
+        } else {
+            const decrement = firebase.firestore.FieldValue.increment(-1);
+
+            //update the user's following status
+            db.collection('users').doc(auth.currentUser.uid).collection('joinedClasses').doc(currentClass).update({
+                following: false
+            });
+
+            //update the total number of followers on the class document
+            db.collection('classes').doc(currentClass).update({
+                following: decrement
+            });
+        }
+    });
+
+    //update the button styles
+    btnGood.classList.add('grey', 'z-depth-0'); //will not add a class twice if it already exists
+    btnLost.classList.add('red', 'darken-2');
+    btnLost.classList.remove('grey', 'z-depth-0'); //if they don't exist then the function WON'T throw an error
+});
