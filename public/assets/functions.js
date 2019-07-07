@@ -16,11 +16,13 @@ const manageTags = (firebaseUser) => {
     }
 }
 
-const manageCreatorMember = () => {
+const manageCreatorMemberTags = (firebaseUser) => {
     var currentClass = sessionStorage.getItem("currentClass");
-    if (auth.currentUser) {
+    //if logged in
+    if (firebaseUser) {
         db.collection('users').doc(auth.currentUser.uid).collection('joinedClasses').doc(currentClass).get().then(thisClass => {
             if (thisClass.data().owner) {
+                console.log('YOU ARE THE OWNER');
                 creatorTags.forEach(item => item.style.display = 'block');
                 memberTags.forEach(item => item.style.display = 'none');
             } else {
@@ -29,8 +31,9 @@ const manageCreatorMember = () => {
             }
                 
         });
-    } else {
-        ;//do nothing
+    } else {//if not loggedIn, don't show them anything specific to the class
+        creatorTags.forEach(item => item.style.display = 'none');
+        memberTags.forEach(item => item.style.display = 'none');
     }
 }
 

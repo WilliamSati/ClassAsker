@@ -5,6 +5,27 @@ var btnGood = document.getElementById('btnGood');
 var btnLost = document.getElementById('btnLost');
 
 
+
+var pieChart = new Chart(document.getElementById("pie-chart"), {
+    type: 'pie',
+    data: {
+        labels: ["Students following", "Students lost"],
+        datasets: [{
+            backgroundColor: ["#4caf50", "#f44336"],
+            data: [0, 0]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        legend: {
+            labels: {
+                fontColor: 'black'
+            }
+        }
+    }
+});
+
 //get data
 auth.onAuthStateChanged(firebaseUser => {
     if (firebaseUser) {
@@ -14,7 +35,7 @@ auth.onAuthStateChanged(firebaseUser => {
     }
     manageQuestionUI(firebaseUser);
     manageTags(firebaseUser);
-    manageCreatorMember();
+    manageCreatorMemberTags(firebaseUser);
 });
 
 //called when you click on a list item. The questionID is embeded in the html when the list item 
@@ -28,22 +49,22 @@ const incrementHits = (questionID) => {
         var newhits = docData.hits;
         var FieldValue = firebase.firestore.FieldValue;
 
-        if (docData.creator === auth.currentUser.uid) {
+        if (docData.creator === auth.currentUser.uid) {//don't allow the creator to vote on his own question
             return;
         }
 
 
-        var hasVoted = false;
+        var hasVoted = false; 
         var voters = docData.upvoters;
         var currentID = auth.currentUser.uid;
 
-        for (var i = 0; i < voters.length; i++) {
+        for (var i = 0; i < voters.length; i++) { //go through all the people that upvoted the question and check if they're one of them
             if (currentID === voters[i]) {
-                hasVoted = true;
+                hasVoted = true;//if they are, remember that.
             }
         }
 
-        if (hasVoted) {
+        if (hasVoted) {//if you already voted and you clicked on a question, that means you want to take away your vote.
             newhits -= 1;
 
             db.collection('classes').doc(currentClass).collection('questions').doc(doc.id).update({
@@ -55,7 +76,7 @@ const incrementHits = (questionID) => {
                 console.log('did not work. If resolving a question, this is expected', error);
             });
 
-        } else {
+        } else {//if you didn't already vote, that means you want to add your vote to the total
             newhits += 1;
 
             db.collection('classes').doc(currentClass).collection('questions').doc(doc.id).update({
@@ -125,22 +146,46 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log(`Encountered error: ${err}`);
     });
 
-    //what happens if someone is on the questions page when the class is deleted?
-    //this realtime listener is called whenever the class document has been changed, so it will catch when it is deleted
+    //this realtime listener is called whenever the class document has been changed, 
     var classDoc = db.collection('classes').doc(currentClass);
+
+    //initialize the pie chart 
+    classDoc.get().then(theClass => {
+        if (theClass.data().creator === auth.currentUser.uid) {
+            var newFollowing = theClass.data().following;
+            var newMembers = theClass.data().members;
+            var newLost = newMembers - newFollowing;
+
+            pieChart.data.datasets[0].data[0] = newFollowing;
+            pieChart.data.datasets[0].data[1] = newLost;
+        }
+    });
+
+    //whenever the class information is changed, call this function
     classDoc.onSnapshot(snapshot => {
         console.log('class has been changed');
+       
         classDoc.get().then(theClass => {
-            if (!theClass.exists) { //if the class has been deleted, go back to the myClasses section
+            //if the class has been deleted, go back to the myClasses section
+            if (!theClass.exists) { 
                 goToMyClasses();
+            }
+            //if the user is the professor,display the pie chart.
+            if (theClass.data().creator === auth.currentUser.uid) {
+                var newFollowing = theClass.data().following;
+                var newMembers = theClass.data().members;
+                var newLost = newMembers - newFollowing;
+
+                pieChart.data.datasets[0].data[0] = newFollowing;
+                pieChart.data.datasets[0].data[1] = newLost;
+
+                pieChart.update();
             }
         });
     });
 
 //the state of the user was saved regarding whether he understood or didn't understand the class. 
     //now let's update the buttons to reflect the user's saved state.
-    console.log('this is the currentUser', auth.currentUser);
-    manageCreatorMember(); //if a user is a member, show the member elements and hide the creator elements. inverse for creat
     setGoodLostButtons();
 
 });
@@ -150,6 +195,7 @@ const setGoodLostButtons = () => {
 
     if (auth.currentUser == null) {
         //doNothing
+        console.log('the user was null');
     } else {
         db.collection('users').doc(auth.currentUser.uid).collection('joinedClasses').doc(currentClass).get().then(userCurrentClass => {
 
@@ -176,13 +222,12 @@ const goToMyClasses = () => {
 //sets up every question in a class in the User interface. questionsArray is an array of every question in the class.
 const setupQuestions = (questionsArray) => {
     var currentClass = sessionStorage.getItem("currentClass");
-    pageTitle.innerHTML = `<h3>${currentClass}</h3>`;
+    pageTitle.innerHTML = `<h3>${currentClass}</h3>`;//set the black class name to the current class, ex CalcIII
 
     let html = '';
     var title = `<li class="collection-header"><h4>Questions</h4></li>`;
 
     html += title;
-    console.log('got here');
     //for every question in the class, add an item to the unordered list in the html file.
     for (var i = 0; i < questionsArray.length; i++) {
         var doc = questionsArray[i];
