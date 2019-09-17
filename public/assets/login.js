@@ -62,5 +62,3 @@ auth.onAuthStateChanged(firebaseUser => {
     }
     manageTags(firebaseUser);
 });
-
-

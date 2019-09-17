@@ -138,7 +138,7 @@ const setupClasses = (data) => {
     var title = `<li class="collection-header"><h4>My Classes</h4></li>`;
 
     html += title;
-    
+
     for (var i = 0; i < data.length; i++) {
         var doc = data[i];
         const classData = doc.data();
@@ -259,9 +259,9 @@ const removeClass = (classID) => { //the owner will never click this
                 //the number of people following along only decreases if the person was following
                 if (following) {
                     numberFollowing -= 1;
-                } 
+                }
 
-                //update the data 
+                //update the data
                 db.collection('classes').doc(classID).update({
                     members: numberOfMembers,
                     following: numberFollowing

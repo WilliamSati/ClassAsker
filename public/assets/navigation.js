@@ -18,4 +18,14 @@ logoutLink.addEventListener('click', e => {
 document.addEventListener('DOMContentLoaded', function () {
     var modals = document.querySelectorAll('.modal');
     M.Modal.init(modals);
+    changeSizes();
 });
+
+window.addEventListener("resize", changeSizes);
+
+var navbar = document.getElementsByClassName('nav-wrapper');
+var logoImage = document.getElementById('logoImage');
+
+function changeSizes() {
+  logoImage.style.height = navbar[0].clientHeight + "px";
+}

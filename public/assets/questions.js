@@ -228,71 +228,154 @@ const setupQuestions = (questionsArray) => {
     var title = `<li class="collection-header"><h4>Questions</h4></li>`;
 
     html += title;
-    //for every question in the class, add an item to the unordered list in the html file.
-    for (var i = 0; i < questionsArray.length; i++) {
-        var doc = questionsArray[i];
 
-        const questionData = doc.data();
+    db.collection('classes').doc(currentClass).get().then(thisClass => {
+        var classData = thisClass.data();
+        var classCreator = classData.creator;
 
-        //if it's not the tracker, get the hits on the question to know the number to display
-        var newhtml = ``;
-        //setup the question list item
-        if (questionData.creator === auth.currentUser.uid) {
-            newhtml = `
+
+        //for every question in the class, add an item to the unordered list in the html file.
+        for (var i = 0; i < questionsArray.length; i++) {
+            var doc = questionsArray[i];
+
+            const questionData = doc.data();
+
+            //if it's not the tracker, get the hits on the question to know the number to display
+            var newhtml = ``;
+            //setup the question list item
+
+            //if the user is the creator of the class
+            if (classCreator == auth.currentUser.uid) {
+                //if the user is the creator of the question and the creator of the class
+                if (questionData.creator === auth.currentUser.uid) {
+                    newhtml = `
+                        <li class="collection-item row">
+					        <div class="col s9">
+						        <a href="#" class="collection-item row" onclick="incrementHits('${doc.id}')">
+
+							        <span class="col s8 black-text">
+                                        ${questionData.question}	
+                                    </span>
+
+							        <span class="col s1 right">
+								        <span class="blue-text valign-wrapper">
+									         ${questionData.hits}
+										        <i class="material-icons">
+											        arrow_upward
+										        </i>
+								        </span>
+							        </span>
+
+						        </a>
+					        </div>
+					        <div class="col s2">
+						        <button class="btn right" onclick="resolveQuestion('${doc.id}')">Resolve</button>
+					        </div>
+                            <div class="col s1" >
+                                <i class="material-icons red-text tooltipped" onclick="resolveQuestion('${doc.id}')" data-position="top" data-tooltip="flag as inapropriate and remove">
+                                  flag
+				            	</i>
+				             </div>
+					    </li>
+                 `;
+                    //if the user is NOT the creator of the question but is still the creator of the class:
+                } else {
+                    newhtml = `
+                        <li class="collection-item row">
+					        <div class="col s11">
+						        <a href="#" class="collection-item row" onclick="incrementHits('${doc.id}')">
+
+							        <span class="col s10 black-text">
+                                        ${questionData.question}	
+                                    </span>
+
+							        <span class="col s1 right">
+								        <span class="blue-text valign-wrapper">
+									         ${questionData.hits}
+										        <i class="material-icons">
+											        arrow_upward
+										        </i>
+								        </span>
+							        </span>
+
+						        </a>
+					        </div>
+                            <div class="col s1" >
+                                <i class="material-icons red-text tooltipped" onclick="resolveQuestion('${doc.id}')" data-position="top" data-tooltip="flag as inappropriate and remove">
+                                  flag
+				            	</i>
+				             </div>
+					    </li>
+                    `;
+                }
+
+            //if the user is not the creator of the class:
+            } else { 
+
+                //if the user is the creator of the question but not the creator of a class
+                if (questionData.creator === auth.currentUser.uid) {
+                    newhtml = `
+                        <li class="collection-item row">
+					        <div class="col s10">
+						        <a href="#" class="collection-item row" onclick="incrementHits('${doc.id}')">
+
+							        <span class="col s9 black-text">
+                                        ${questionData.question}	
+                                    </span>
+
+							        <span class="col s1 right">
+								        <span class="blue-text valign-wrapper">
+									         ${questionData.hits}
+										        <i class="material-icons">
+											        arrow_upward
+										        </i>
+								        </span>
+							        </span>
+
+						        </a>
+					        </div>
+					        <div class="col s2">
+						        <button class="btn right" onclick="resolveQuestion('${doc.id}')">Resolve</button>
+					        </div>
+					    </li>
+                 `;
+                //if the user is not the creator of the class or the question:
+                } else {
+                    newhtml = `
                     <li class="collection-item row">
+					    <div class="col s12">
+						    <a href="#" class="collection-item row" onclick="incrementHits('${doc.id}')">
 
-					<div class="col s10">
-						<a href="#" class="collection-item row" onclick="incrementHits('${doc.id}')">
+							    <span class="col s11 black-text">
+                                    ${questionData.question}	
+                                </span>
 
-							<span class="col s9 black-text">
-                                ${questionData.question}	
-                            </span>
+							    <span class="col s1 right">
+								    <span class="blue-text valign-wrapper">
+									     ${questionData.hits}
+										    <i class="material-icons">
+											    arrow_upward
+										    </i>
+								    </span>
+							    </span>
+						    </a>
+					    </div>
+			        </li>
+                    `;
+                }
+            }
 
-							<span class="col s1 right">
-								<span class="blue-text valign-wrapper">
-									 ${questionData.hits}
-										<i class="material-icons">
-											arrow_upward
-										</i>
-								</span>
-							</span>
+            //add the newly crafted list item to the view template
+            html += newhtml;
+        };
 
-						</a>
-					</div>
-					<div class="col s2">
-						<button class="btn" onclick="resolveQuestion('${doc.id}')">Resolve</button>
-					</div>
-					</li>
-             `;
-        } else {
-            newhtml = `
-                <li class="collection-item row">
+        questionList.innerHTML = html; //questionList is created in functions.js
 
-					<div class="col s12">
-						<a href="#" class="collection-item row" onclick="incrementHits('${doc.id}')">
+        //activate the new tool tipped elements
+        var elemsToolTips = document.querySelectorAll('.tooltipped');
+        M.Tooltip.init(elemsToolTips);
 
-							<span class="col s11 black-text">
-                                ${questionData.question}	
-                            </span>
-
-							<span class="col s1 right">
-								<span class="blue-text valign-wrapper">
-									 ${questionData.hits}
-										<i class="material-icons">
-											arrow_upward
-										</i>
-								</span>
-							</span>
-						</a>
-					</div>
-			    </li>
-                   
-             `;
-        }
-        //add the newly crafted list item to the view template
-        html += newhtml;
-    };
-    questionList.innerHTML = html; //questionList is created in functions.js
+    });
 }
 
 //If a user created a question, they will see a button that says resolve that will allow them to call this function
